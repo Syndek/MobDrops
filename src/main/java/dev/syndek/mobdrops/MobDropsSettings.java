@@ -18,6 +18,7 @@
 package dev.syndek.mobdrops;
 
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -27,7 +28,7 @@ public class MobDropsSettings {
     private final MobDropsPlugin                  plugin;
     private final Map<EntityType, Iterable<Drop>> drops = new EnumMap<>(EntityType.class);
 
-    public MobDropsSettings(final MobDropsPlugin plugin) {
+    public MobDropsSettings(final @NotNull MobDropsPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -39,7 +40,7 @@ public class MobDropsSettings {
         this.drops.clear();
     }
 
-    public Iterable<Drop> getDropsFor(final EntityType entityType) {
+    public @NotNull Iterable<Drop> getDropsFor(final @NotNull EntityType entityType) {
         final Iterable<Drop> drops = this.drops.get(entityType);
         return drops == null ? Collections.emptyList() : drops;
     }

@@ -22,18 +22,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class EntityDeathListener implements Listener {
     private final MobDropsPlugin plugin;
 
-    public EntityDeathListener(final MobDropsPlugin plugin) {
+    public EntityDeathListener(final @NotNull MobDropsPlugin plugin) {
         this.plugin = plugin;
     }
 
     @EventHandler
-    private void onEntityDeath(final EntityDeathEvent event) {
+    private void onEntityDeath(final @NotNull EntityDeathEvent event) {
         final LivingEntity entity = event.getEntity();
 
         for (final Drop drop : this.plugin.getSettings().getDropsFor(entity.getType())) {

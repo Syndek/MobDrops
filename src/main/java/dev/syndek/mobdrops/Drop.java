@@ -20,6 +20,7 @@ package dev.syndek.mobdrops;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permissible;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -35,10 +36,10 @@ public class Drop {
     private final float            chance;
 
     public Drop(
-        final Collection<UUID> applicableWorldIds,
+        final @NotNull Collection<UUID> applicableWorldIds,
         final boolean isApplicableOnlyToPlayerKills,
-        final String permissionNode,
-        final ItemStack item,
+        final @NotNull String permissionNode,
+        final @NotNull ItemStack item,
         final int quantity,
         final float chance
     ) {
@@ -54,7 +55,7 @@ public class Drop {
         return this.isApplicableOnlyToPlayerKills;
     }
 
-    public ItemStack getItem() {
+    public @NotNull ItemStack getItem() {
         return this.item;
     }
 
@@ -62,11 +63,11 @@ public class Drop {
         return this.chance;
     }
 
-    public boolean canDropIn(final World world) {
+    public boolean canDropIn(final @NotNull World world) {
         return this.applicableWorldIds == null || this.applicableWorldIds.contains(world.getUID());
     }
 
-    public boolean canDropFor(final Permissible permissible) {
+    public boolean canDropFor(final @NotNull Permissible permissible) {
         return this.permissionNode == null || permissible.hasPermission(this.permissionNode);
     }
 }

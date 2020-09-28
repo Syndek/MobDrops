@@ -18,6 +18,7 @@
 package dev.syndek.mobdrops;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 public class MobDropsPlugin extends JavaPlugin {
     private final MobDropsSettings settings = new MobDropsSettings(this);
@@ -29,7 +30,7 @@ public class MobDropsPlugin extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new EntityDeathListener(this), this);
     }
 
-    public MobDropsSettings getSettings() {
+    public @NotNull MobDropsSettings getSettings() {
         return this.settings;
     }
 }
