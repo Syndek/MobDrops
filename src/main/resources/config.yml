@@ -1,0 +1,19 @@
+# This is where you define the different drops for entity deaths.
+drops:
+  - entity-types: ['creeper']
+    applicable-worlds: ['world']
+    only-player-kills: true
+    item: 'custom:special_sword'
+    quantity: 1
+    chance: 10
+
+# This is where you define custom items to use in drops.
+items:
+  - name: 'special_sword'
+    material: 'gold_sword'
+    meta:
+      display-name: '&eSpecial Sword'
+      lore: |
+      'This is line 1.'
+      'This is line 2'
+      unbreakable: true

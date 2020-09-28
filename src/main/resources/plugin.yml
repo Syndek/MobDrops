@@ -1,0 +1,10 @@
+name: 'MobDrops'
+version: '1.0.0'
+description: 'Provides custom drops when killing mobs.'
+author: 'Syndek'
+
+main: 'dev.syndek.mobdrops.MobDropsPlugin'
+
+commands:
+  mdreload:
+    description: 'Reloads the plugin configuration.'
