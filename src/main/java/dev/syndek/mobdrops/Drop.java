@@ -21,6 +21,7 @@ import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class Drop {
     public Drop(
         final @NotNull Collection<UUID> applicableWorldIds,
         final boolean isApplicableOnlyToPlayerKills,
-        final @NotNull String permissionNode,
+        final @Nullable String permissionNode,
         final @NotNull ItemStack item,
         final int quantity,
         final float chance
