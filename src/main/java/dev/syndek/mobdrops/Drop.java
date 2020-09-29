@@ -37,7 +37,7 @@ public class Drop {
     private final float            chance;
 
     public Drop(
-        final @NotNull Collection<UUID> applicableWorldIds,
+        final @Nullable Collection<UUID> applicableWorldIds,
         final boolean isApplicableOnlyToPlayerKills,
         final @Nullable String permissionNode,
         final @NotNull ItemStack item,
