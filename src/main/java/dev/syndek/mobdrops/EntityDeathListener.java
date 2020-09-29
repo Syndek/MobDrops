@@ -60,8 +60,8 @@ public final class EntityDeathListener implements Listener {
                     ThreadLocalRandom.current().nextFloat() *
                         (Drop.MAX_CHANCE - Drop.MIN_CHANCE);
 
-            // Only drop if drop.getChance() <= random.
-            if (drop.getChance() > random) {
+            // Only drop if random <= drop.getChance().
+            if (random > drop.getChance()) {
                 return;
             }
 
