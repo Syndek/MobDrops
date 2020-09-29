@@ -3,6 +3,7 @@ drops:
   - entity-types: ['creeper']
     applicable-worlds: ['world']
     only-player-kills: true
+    permission-node: 'reward.creeper.special-sword'
     item: 'custom:special_sword'
     quantity: 1
     chance: 10
