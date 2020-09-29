@@ -54,7 +54,9 @@ public class MobDropsSettings {
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(Pair::getKey, Pair::getItem));
 
-        config.getMapList("drops").forEach(dropData -> this.parseDrop(dropData, items));
+        for (final Map<?, ?> dropData : config.getMapList("drops")) {
+            this.parseDrop(dropData, items);
+        }
     }
 
     public @NotNull Iterable<Drop> getDropsFor(final @NotNull EntityType entityType) {
