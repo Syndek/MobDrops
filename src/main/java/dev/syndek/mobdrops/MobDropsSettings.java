@@ -33,8 +33,7 @@ import java.util.stream.Collectors;
 public class MobDropsSettings {
     private final MobDropsPlugin plugin;
 
-    private Map<EntityType, Collection<Drop>> drops = Collections.emptyMap();
-    private Map<String, ItemStack>            items = Collections.emptyMap();
+    private final Map<EntityType, Collection<Drop>> drops = new EnumMap<>(EntityType.class);
 
     public MobDropsSettings(final @NotNull MobDropsPlugin plugin) {
         this.plugin = plugin;
@@ -44,16 +43,18 @@ public class MobDropsSettings {
         this.plugin.saveDefaultConfig();
         this.plugin.reloadConfig();
 
+        // Clear drops map on each load. We don't need to recreate it each time.
+        this.drops.clear();
+
         final Configuration config = this.plugin.getConfig();
 
         // Process custom items first so that drops using them are valid.
-        this.items = config.getMapList("items").stream()
+        final Map<String, ItemStack> items = config.getMapList("items").stream()
             .map(this::parseItem)
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(Pair::getKey, Pair::getItem));
 
-        this.drops = new HashMap<>();
-        config.getMapList("drops").forEach(this::parseDrop);
+        config.getMapList("drops").forEach(dropData -> this.parseDrop(dropData, items));
     }
 
     public @NotNull Iterable<Drop> getDropsFor(final @NotNull EntityType entityType) {
@@ -106,7 +107,7 @@ public class MobDropsSettings {
         return pair;
     }
 
-    private void parseDrop(final @NotNull Map<?, ?> dropData) {
+    private void parseDrop(final @NotNull Map<?, ?> dropData, final @NotNull Map<String, ItemStack> items) {
         final List<String> entityTypeNames = (List<String>) dropData.get("entity-types");
         if (entityTypeNames == null || entityTypeNames.isEmpty()) {
             return;
@@ -119,7 +120,7 @@ public class MobDropsSettings {
 
         final ItemStack item;
         if (itemName.startsWith("custom:")) {
-            final ItemStack customItem = this.items.get(itemName.substring(7));
+            final ItemStack customItem = items.get(itemName.substring(7));
             if (customItem == null) {
                 return;
             }
