@@ -19,6 +19,7 @@ package dev.syndek.mobdrops;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
@@ -32,8 +33,8 @@ import java.util.stream.Collectors;
 public class MobDropsSettings {
     private final MobDropsPlugin plugin;
 
-    private Map<EntityType, Iterable<Drop>> drops = Collections.emptyMap();
-    private Map<String, ItemStack>          items = Collections.emptyMap();
+    private Map<EntityType, Collection<Drop>> drops = Collections.emptyMap();
+    private Map<String, ItemStack>            items = Collections.emptyMap();
 
     public MobDropsSettings(final @NotNull MobDropsPlugin plugin) {
         this.plugin = plugin;
@@ -46,11 +47,13 @@ public class MobDropsSettings {
         final Configuration config = this.plugin.getConfig();
 
         // Process custom items first so that drops using them are valid.
-        this.items = config.getMapList("items")
-            .stream()
+        this.items = config.getMapList("items").stream()
             .map(this::parseItem)
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(Pair::getKey, Pair::getItem));
+
+        this.drops = new HashMap<>();
+        config.getMapList("drops").forEach(this::parseDrop);
     }
 
     public @NotNull Iterable<Drop> getDropsFor(final @NotNull EntityType entityType) {
@@ -101,6 +104,68 @@ public class MobDropsSettings {
         }
 
         return pair;
+    }
+
+    private void parseDrop(final @NotNull Map<?, ?> dropData) {
+        final List<String> entityTypeNames = (List<String>) dropData.get("entity-types");
+        if (entityTypeNames == null || entityTypeNames.isEmpty()) {
+            return;
+        }
+
+        final String itemName = (String) dropData.get("item");
+        if (itemName == null) {
+            return;
+        }
+
+        final ItemStack item;
+        if (itemName.startsWith("custom:")) {
+            final ItemStack customItem = this.items.get(itemName.substring(7));
+            if (customItem == null) {
+                return;
+            }
+            item = customItem;
+        } else {
+            final Material material = Material.matchMaterial(itemName);
+            if (material == null) {
+                return;
+            }
+            item = new ItemStack(material);
+        }
+
+        final Iterable<EntityType> entityTypes = entityTypeNames.stream()
+            .map(String::toUpperCase)
+            .map(EntityType::valueOf)
+            .collect(Collectors.toList());
+
+        final List<String> applicableWorldNames = (List<String>) dropData.get("applicable-worlds");
+        final Collection<UUID> applicableWorldIds = applicableWorldNames == null ? null : applicableWorldNames.stream()
+            .map(this.plugin.getServer()::getWorld)
+            .filter(Objects::nonNull)
+            .map(World::getUID)
+            .collect(Collectors.toList());
+
+        final Number chanceValue = (Number) dropData.get("chance");
+
+        final Drop drop = new Drop(
+            applicableWorldIds,
+            dropData.containsKey("player-kills-only")
+                ? (Boolean) dropData.get("player-kills-only")
+                : false,
+            (String) dropData.get("permission-node"),
+            item,
+            (Integer) dropData.get("quantity"),
+            chanceValue.floatValue() / 100
+        );
+
+        for (final EntityType entityType : entityTypes) {
+            if (this.drops.containsKey(entityType)) {
+                this.drops.get(entityType).add(drop);
+            } else {
+                final Collection<Drop> drops = new ArrayList<>();
+                drops.add(drop);
+                this.drops.put(entityType, drops);
+            }
+        }
     }
 
     private static class Pair {
