@@ -17,7 +17,6 @@
 
 package dev.syndek.mobdrops;
 
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -35,15 +34,18 @@ public final class EntityDeathListener implements Listener {
 
     @EventHandler
     private void onEntityDeath(final @NotNull EntityDeathEvent event) {
-        final LivingEntity entity = event.getEntity();
+        this.handleDrops(event, this.plugin.getSettings().getGlobalDrops());
+        this.handleDrops(event, this.plugin.getSettings().getDropsFor(event.getEntity().getType()));
+    }
 
-        for (final Drop drop : this.plugin.getSettings().getDropsFor(entity.getType())) {
+    private void handleDrops(final @NotNull EntityDeathEvent event, final @NotNull Iterable<Drop> drops) {
+        for (final Drop drop : drops) {
             // Don't drop if the current world is not applicable for the drop.
-            if (!drop.canDropIn(entity.getWorld())) {
+            if (!drop.canDropIn(event.getEntity().getWorld())) {
                 return;
             }
 
-            final Player killer = entity.getKiller();
+            final Player killer = event.getEntity().getKiller();
 
             // Don't drop if the entity was not killed by a player and the drop is only applicable for player kills.
             if (killer == null && drop.isApplicableOnlyToPlayerKills()) {

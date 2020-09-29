@@ -33,7 +33,8 @@ import java.util.stream.Collectors;
 public class MobDropsSettings {
     private final MobDropsPlugin plugin;
 
-    private final Map<EntityType, Collection<Drop>> drops = new EnumMap<>(EntityType.class);
+    private final Map<EntityType, Collection<Drop>> drops       = new EnumMap<>(EntityType.class);
+    private final Collection<Drop>                  globalDrops = new ArrayList<>();
 
     public MobDropsSettings(final @NotNull MobDropsPlugin plugin) {
         this.plugin = plugin;
@@ -43,8 +44,9 @@ public class MobDropsSettings {
         this.plugin.saveDefaultConfig();
         this.plugin.reloadConfig();
 
-        // Clear drops map on each load. We don't need to recreate it each time.
+        // Clear drops on each load. We don't need to recreate the collections each time.
         this.drops.clear();
+        this.globalDrops.clear();
 
         final Configuration config = this.plugin.getConfig();
 
@@ -62,6 +64,10 @@ public class MobDropsSettings {
     public @NotNull Iterable<Drop> getDropsFor(final @NotNull EntityType entityType) {
         final Iterable<Drop> drops = this.drops.get(entityType);
         return drops == null ? Collections.emptyList() : drops;
+    }
+
+    public Iterable<Drop> getGlobalDrops() {
+        return this.globalDrops;
     }
 
     private @Nullable Pair parseItem(final @NotNull Map<?, ?> itemData) {
@@ -110,11 +116,6 @@ public class MobDropsSettings {
     }
 
     private void parseDrop(final @NotNull Map<?, ?> dropData, final @NotNull Map<String, ItemStack> items) {
-        final List<String> entityTypeNames = (List<String>) dropData.get("entity-types");
-        if (entityTypeNames == null || entityTypeNames.isEmpty()) {
-            return;
-        }
-
         final String itemName = (String) dropData.get("item");
         if (itemName == null) {
             return;
@@ -135,11 +136,6 @@ public class MobDropsSettings {
             item = new ItemStack(material);
         }
 
-        final Iterable<EntityType> entityTypes = entityTypeNames.stream()
-            .map(String::toUpperCase)
-            .map(EntityType::valueOf)
-            .collect(Collectors.toList());
-
         final List<String> applicableWorldNames = (List<String>) dropData.get("applicable-worlds");
         final Collection<UUID> applicableWorldIds = applicableWorldNames == null ? null : applicableWorldNames.stream()
             .map(this.plugin.getServer()::getWorld)
@@ -159,6 +155,24 @@ public class MobDropsSettings {
             (Integer) dropData.get("quantity"),
             chanceValue.floatValue() / 100
         );
+
+        final List<String> entityTypeNames = (List<String>) dropData.get("entity-types");
+
+        // If no entity-types key is provided, the drop is global (applicable to all entities).
+        if (entityTypeNames == null) {
+            this.globalDrops.add(drop);
+            return;
+        }
+
+        // If entity-types is present, but is empty, this is an error.
+        if (entityTypeNames.isEmpty()) {
+            return;
+        }
+
+        final Iterable<EntityType> entityTypes = entityTypeNames.stream()
+            .map(String::toUpperCase)
+            .map(EntityType::valueOf)
+            .collect(Collectors.toList());
 
         for (final EntityType entityType : entityTypes) {
             if (this.drops.containsKey(entityType)) {
