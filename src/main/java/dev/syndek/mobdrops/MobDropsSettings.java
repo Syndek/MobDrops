@@ -21,11 +21,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,13 +51,24 @@ public class MobDropsSettings {
         final Configuration config = this.plugin.getConfig();
 
         // Process custom items first so that drops using them are valid.
-        final Map<String, ItemStack> items = config.getMapList("items").stream()
-            .map(this::parseItem)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toMap(Pair::getKey, Pair::getItem));
+        final Map<String, ItemStack> items = new HashMap<>();
+        for (final Map<?, ?> itemData : config.getMapList("items")) {
+            try {
+                final Pair pair = this.parseItem(itemData);
+                items.put(pair.getKey(), pair.getItem());
+            } catch (final InvalidConfigurationException | ClassCastException ex) {
+                this.plugin.getLogger().warning("Error whilst loading configuration: " + ex.getMessage());
+                this.plugin.getLogger().warning("The item will be skipped.");
+            }
+        }
 
         for (final Map<?, ?> dropData : config.getMapList("drops")) {
-            this.parseDrop(dropData, items);
+            try {
+                this.parseDrop(dropData, items);
+            } catch (final InvalidConfigurationException | ClassCastException ex) {
+                this.plugin.getLogger().warning("Error whilst loading configuration: " + ex.getMessage());
+                this.plugin.getLogger().warning("The drop will be skipped.");
+            }
         }
     }
 
@@ -70,20 +81,20 @@ public class MobDropsSettings {
         return this.globalDrops;
     }
 
-    private @Nullable Pair parseItem(final @NotNull Map<?, ?> itemData) {
+    private @NotNull Pair parseItem(final @NotNull Map<?, ?> itemData) throws InvalidConfigurationException {
         final String name = (String) itemData.get("name");
         if (name == null) {
-            return null;
+            throw new InvalidConfigurationException("Missing key 'name' in custom item.");
         }
 
         final String materialString = (String) itemData.get("material");
         if (materialString == null) {
-            return null;
+            throw new InvalidConfigurationException("Missing key 'material' in custom item '" + name + "'.");
         }
 
         final Material material = Material.matchMaterial(materialString);
         if (material == null || !material.isItem()) {
-            return null;
+            throw new InvalidConfigurationException("Invalid material in custom item '" + name + "'.");
         }
 
         final ItemStack item = new ItemStack(material);
@@ -115,23 +126,24 @@ public class MobDropsSettings {
         return pair;
     }
 
-    private void parseDrop(final @NotNull Map<?, ?> dropData, final @NotNull Map<String, ItemStack> items) {
+    @SuppressWarnings("unchecked") // Fall back on ClassCastException for configuration errors.
+    private void parseDrop(final @NotNull Map<?, ?> dropData, final @NotNull Map<String, ItemStack> items) throws InvalidConfigurationException {
         final String itemName = (String) dropData.get("item");
         if (itemName == null) {
-            return;
+            throw new InvalidConfigurationException("Missing key 'item' in drop.");
         }
 
         final ItemStack item;
         if (itemName.startsWith("custom:")) {
             final ItemStack customItem = items.get(itemName.substring(7));
             if (customItem == null) {
-                return;
+                throw new InvalidConfigurationException("Invalid custom item '" + itemName + "' in drop.");
             }
             item = customItem;
         } else {
             final Material material = Material.matchMaterial(itemName);
             if (material == null) {
-                return;
+                throw new InvalidConfigurationException("Invalid material '" + itemName + "' in drop.");
             }
             item = new ItemStack(material);
         }
@@ -166,12 +178,21 @@ public class MobDropsSettings {
 
         // If entity-types is present, but is empty, this is an error.
         if (entityTypeNames.isEmpty()) {
-            return;
+            throw new InvalidConfigurationException("Key 'entity-types' is present, but array is empty.");
         }
 
         final Iterable<EntityType> entityTypes = entityTypeNames.stream()
             .map(String::toUpperCase)
-            .map(EntityType::valueOf)
+            .map(type -> {
+                try {
+                    return EntityType.valueOf(type);
+                } catch (final IllegalArgumentException ex) {
+                    // We want to ignore unrecognised entity types.
+                    // They might change from update to update, and it's not worth breaking configuration over that.
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
         for (final EntityType entityType : entityTypes) {
