@@ -77,7 +77,7 @@ public class MobDropsSettings {
         return drops == null ? Collections.emptyList() : drops;
     }
 
-    public Iterable<Drop> getGlobalDrops() {
+    public @NotNull Iterable<Drop> getGlobalDrops() {
         return this.globalDrops;
     }
 
