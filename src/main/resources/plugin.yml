@@ -8,3 +8,7 @@ main: 'dev.syndek.mobdrops.MobDropsPlugin'
 commands:
   mdreload:
     description: 'Reloads the plugin configuration.'
+
+permissions:
+  mobdrops.*:
+    mobdrops.reload: true
