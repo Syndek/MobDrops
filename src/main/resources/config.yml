@@ -1,4 +1,17 @@
 # This is where you define the different drops for entity deaths.
+#
+# A 'drops' entry should look like the following:
+#
+# - entity-types: A list of entity types to drop for. If not present, applies to all entity types.
+#   applicable-worlds: A list of world names to drop in. If not present, applies to all worlds.
+#   only-player-kills: A true/false value indicating whether to only drop for player kills. If not present, defaults to false.
+#   permission-node: Optional permission node causing the drop to occur only when a player with the node gets a kill.
+#   item: The item to drop. Must be a valid Minecraft item name, or a custom item prefixed with 'custom:'.
+#   quantity: The quantity of the item to drop. Must be between 1 and the maximum stack size of the item, inclusive.
+#   chance: The chance the item will drop. Must be a float from 0.00001 to 1.0, where 1.0 is 100% likelihood of dropping.
+#
+# If a permission-node value is set, the only-player-kills value is overridden and acts as if it's set to 'true'.
+#
 drops:
   - entity-types: ['creeper']
     applicable-worlds: ['world']
@@ -6,9 +19,22 @@ drops:
     permission-node: 'reward.creeper.special-sword'
     item: 'custom:special_sword'
     quantity: 1
-    chance: 10
+    chance: 0.05
+  - item: 'gold_nugget'
+    quantity: 4
+    chance: 0.5
 
 # This is where you define custom items to use in drops.
+#
+# An 'items' entry should look like the following:
+#
+# - name: A unique name for the item.
+#   material: A valid Minecraft item name.
+#   meta: The meta for the item. All parameters are completely optional.
+#     display-name: The display name of the item. Supports Minecraft '&' colour codes.
+#     lore: The lore of the item. Supports Minecraft '&' colour codes and can be multiline.
+#     unbreakable: A true/false value indicating whether the item is unbreakable.
+#
 items:
   - name: 'special_sword'
     material: 'gold_sword'
@@ -17,4 +43,5 @@ items:
       lore: |
         This is line 1.
         This is line 2.
+        &nThis line is special.
       unbreakable: true
