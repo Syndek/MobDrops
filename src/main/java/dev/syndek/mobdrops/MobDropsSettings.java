@@ -161,20 +161,31 @@ public class MobDropsSettings {
         }
 
         final Collection<UUID> applicableWorldIds = applicableWorldNames == null ? null : applicableWorldNames.stream()
+            .filter(Objects::nonNull)
             .map(this.plugin.getServer()::getWorld)
             .filter(Objects::nonNull)
             .map(World::getUID)
             .collect(Collectors.toList());
 
+        final Boolean playerKillsOnly = (Boolean) dropData.get("player-kills-only");
+
+        final Integer quantity = (Integer) dropData.get("quantity");
+        if (quantity == null) {
+            throw new InvalidConfigurationException("Missing key 'quantity' in drop.");
+        }
+
+        final Number chance = (Number) dropData.get("chance");
+        if (chance == null) {
+            throw new InvalidConfigurationException("Missing key 'chance' in drop.");
+        }
+
         final Drop drop = new Drop(
             applicableWorldIds,
-            dropData.containsKey("player-kills-only")
-                ? (Boolean) dropData.get("player-kills-only")
-                : false,
+            playerKillsOnly != null ? playerKillsOnly : false,
             (String) dropData.get("permission-node"),
             item,
-            (Integer) dropData.get("quantity"),
-            ((Number) dropData.get("chance")).floatValue()
+            quantity,
+            chance.floatValue()
         );
 
         final List<String> entityTypeNames = (List<String>) dropData.get("entity-types");
@@ -191,6 +202,7 @@ public class MobDropsSettings {
         }
 
         final Iterable<EntityType> entityTypes = entityTypeNames.stream()
+            .filter(Objects::nonNull)
             .map(String::toUpperCase)
             .map(type -> {
                 try {
