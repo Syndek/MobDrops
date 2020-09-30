@@ -65,7 +65,7 @@ public class MobDropsSettings {
         for (final Map<?, ?> dropData : config.getMapList("drops")) {
             try {
                 this.parseDrop(dropData, items);
-            } catch (final InvalidConfigurationException | ClassCastException ex) {
+            } catch (final InvalidConfigurationException | IllegalArgumentException | ClassCastException ex) {
                 this.plugin.getLogger().warning("Error whilst loading configuration: " + ex.getMessage());
                 this.plugin.getLogger().warning("The drop will be skipped.");
             }
@@ -155,8 +155,6 @@ public class MobDropsSettings {
             .map(World::getUID)
             .collect(Collectors.toList());
 
-        final Number chanceValue = (Number) dropData.get("chance");
-
         final Drop drop = new Drop(
             applicableWorldIds,
             dropData.containsKey("player-kills-only")
@@ -165,7 +163,7 @@ public class MobDropsSettings {
             (String) dropData.get("permission-node"),
             item,
             (Integer) dropData.get("quantity"),
-            chanceValue.floatValue() / 100
+            ((Number) dropData.get("chance")).floatValue()
         );
 
         final List<String> entityTypeNames = (List<String>) dropData.get("entity-types");

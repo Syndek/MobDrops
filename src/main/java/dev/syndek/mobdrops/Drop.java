@@ -44,6 +44,18 @@ public class Drop {
         final int quantity,
         final float chance
     ) {
+        if (quantity < 1 || quantity > item.getMaxStackSize()) {
+            throw new IllegalArgumentException(
+                "Quantity value must be between 1 and " + item.getMaxStackSize() + ", inclusive."
+            );
+        }
+
+        if (chance < Drop.MIN_CHANCE || chance > Drop.MAX_CHANCE) {
+            throw new IllegalArgumentException(
+                "Chance value must be between " + Drop.MIN_CHANCE + " and " + Drop.MAX_CHANCE + ", inclusive."
+            );
+        }
+
         this.applicableWorldIds = applicableWorldIds;
         this.isApplicableOnlyToPlayerKills = isApplicableOnlyToPlayerKills;
         this.permissionNode = permissionNode;
