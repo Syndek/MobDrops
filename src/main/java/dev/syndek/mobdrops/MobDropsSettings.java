@@ -106,20 +106,25 @@ public class MobDropsSettings {
             if (meta == null) {
                 return pair;
             }
-            if (metaData.containsKey("display-name")) {
-                final String displayName = (String) metaData.get("display-name");
+
+            final String displayName = (String) metaData.get("display-name");
+            if (displayName != null) {
                 meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
             }
-            if (metaData.containsKey("lore")) {
-                final String lore = (String) metaData.get("lore");
+
+            final String lore = (String) metaData.get("lore");
+            if (lore != null) {
                 final List<String> loreLines = Arrays.stream(lore.split("\n"))
                     .map(line -> ChatColor.translateAlternateColorCodes('&', line))
                     .collect(Collectors.toList());
                 meta.setLore(loreLines);
             }
-            if (metaData.containsKey("unbreakable")) {
+
+            final Boolean unbreakable = (Boolean) metaData.get("unbreakable");
+            if (unbreakable != null) {
                 meta.setUnbreakable((Boolean) metaData.get("unbreakable"));
             }
+
             item.setItemMeta(meta);
         }
 
