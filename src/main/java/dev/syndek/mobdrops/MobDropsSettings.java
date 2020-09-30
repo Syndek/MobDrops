@@ -154,6 +154,12 @@ public class MobDropsSettings {
         }
 
         final List<String> applicableWorldNames = (List<String>) dropData.get("applicable-worlds");
+
+        // If applicable-worlds is present, but is empty, this is an error.
+        if (applicableWorldNames != null && applicableWorldNames.isEmpty()) {
+            throw new InvalidConfigurationException("Key 'applicable-worlds' is present, but array is empty.");
+        }
+
         final Collection<UUID> applicableWorldIds = applicableWorldNames == null ? null : applicableWorldNames.stream()
             .map(this.plugin.getServer()::getWorld)
             .filter(Objects::nonNull)
