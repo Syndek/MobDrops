@@ -65,7 +65,7 @@ public class Drop {
     }
 
     public boolean isApplicableOnlyToPlayerKills() {
-        return this.isApplicableOnlyToPlayerKills;
+        return this.permissionNode != null || this.isApplicableOnlyToPlayerKills;
     }
 
     public @NotNull ItemStack getItem() {
