@@ -122,7 +122,7 @@ public class MobDropsSettings {
 
             final Boolean unbreakable = (Boolean) metaData.get("unbreakable");
             if (unbreakable != null) {
-                meta.setUnbreakable((Boolean) metaData.get("unbreakable"));
+                meta.setUnbreakable(unbreakable);
             }
 
             item.setItemMeta(meta);
