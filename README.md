@@ -16,6 +16,13 @@ but feel free to get in contact if you run into any problems.
 
 Version numbers roughly follow the [Semantic Versioning Guidelines](https://semver.org).
 
+## Downloads
+
+MobDrops is available to download at the following locations:
+- [GitHub](https://github.com/syndek/mobdrops/releases)
+- [Bukkit](https://dev.bukkit.org/projects/mobdrops)
+- [Spigot](https://www.spigotmc.org/resources/mobdrops.84357)
+
 ## Commands
 
 Currently, the plugin only registers one command.
